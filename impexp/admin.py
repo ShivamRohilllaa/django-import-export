@@ -6,6 +6,26 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 
+class ExportMixinAdmin(ExportMixin, admin.ModelAdmin):
+    
+    #Choose your format
+
+    def get_export_formats(self):
+        formats = (
+            base_formats.CSV,
+            base_formats.XLSX,
+            base_formats.TSV,
+            base_formats.ODS,
+            base_formats.JSON,
+            base_formats.HTML,
+          )
+
+        return [f for f in formats if f().can_export()]
+
+    class Meta:
+        abstract = True
+
+
 class BookResource(resources.ModelResource):
     writer = Field()
     publisher = Field()
@@ -20,7 +40,7 @@ class BookResource(resources.ModelResource):
     def dehydrate_publisher(self, book):
         return '%s by %s' % (book.bookname, book.publisher.auth.username)
 
-class BookAdmin(ImportExportModelAdmin):
+class BookAdmin(ExportMixinAdmin):
     resource_class = BookResource
     
 
